@@ -1,0 +1,247 @@
+---
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+  
+# Title: Software framework for the processing and statistical analysis of multivariate MS-data
+# Owner: Laboratory of Chemical Analysis (LCA), Ghent university
+# Creator: Dr. Marilyn De Graeve, Tiffeny De Coninck
+# Running title: R pipeline
+# Script: Part I: pre-processing
+---
+
+```{r include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r echo=FALSE}
+setwd(PATH)
+library(knitr)
+
+Rmarkdown <- paste(PATH, "/R_scripts/ReportRMarkdown.R", sep = "")
+read_chunk(Rmarkdown)
+knitr::opts_chunk$set(echo = TRUE) 
+```
+
+```{r, cache= FALSE, results="hide", include=FALSE}
+<<NAAM>>
+```
+
+```{r, echo=FALSE}
+setwd(PATH)
+library(knitr)
+
+Configuration <- "Configuration.R"
+Configuration <- file.path(path_data_in, Configuration)
+read_chunk(Configuration)      #Get informaration from configuration file.
+knitr::opts_chunk$set(echo = TRUE) 
+```
+
+```{r, cache= FALSE, results="hide", include=FALSE}
+<<statistics>>
+ <<settings>>
+  <<preprocessing>>
+```
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r out.width = "100%", fig.align="left"}
+  setwd(PATH)
+  library(EBImage)
+  
+  logo <- "Logo.png"
+  logo <- file.path(PATH, 'Data/Reports/Template/Logo.png')
+  LOGO <- readImage(logo)
+  display(LOGO)
+```
+
+```{r out.width = "100%", fig.align="left"}
+  setwd(PATH)
+  library(EBImage)
+  
+  Title <- "PART1.png"
+  Title <- file.path(PATH, 'Data/Reports/Template/PART1.png')
+  TITLE <- readImage(Title)
+  display(TITLE)
+
+```
+
+```{r}
+Date <- Sys.Date()
+cat(paste("This is the automatic report for the preprocessing part of experiment ", name_project, sep = ""))
+cat("\n\n")
+cat(paste("This report is made on ", Date, sep = ""))
+```
+
+\newpage
+
+**Sample information**
+
+```{r echo = FALSE}
+cat("\n")
+cat("The samples for this experiment are: ")
+
+setwd(PATH)
+if (INPUT_SAMPLES == paste(name_project, '_sampleMetadata.txt', sep = ""))
+    {
+  
+  INPUT <- INPUT_SAMPLES    #table with samples and information about the experiment
+  INPUT <- file.path(path_data_in, INPUT)
+  sampleMetadata <- read.table(INPUT, header=TRUE, sep="\t")
+
+  COLLUMN_NR_SAMPLENAMES <- 1
+  COLLUMN_END <- COLLUMN_NR_LAST_BEFORE_COMPARISONS 
+
+  sampleMetadata[ , c(COLLUMN_NR_SAMPLENAMES:COLLUMN_END)]
+} else {
+  filenames <- list.files(path_data_in, pattern="*.mzXML", recursive = TRUE)
+  print(filenames)
+}
+
+```
+
+**Materials and methods**
+
+The polarity that was used is:
+```{r, cache= FALSE, echo=FALSE}
+cat(POLARITY)
+```
+
+The instrument used for this experiment is:
+```{r, cache= FALSE, echo=FALSE}
+cat(INSTRUMENT)
+```
+
+The pre-processing part consists of peak picking, RT alignment and peak filling.
+
+For peak picking two methdos are possible: fixed peak picking or optimized peak picking. 
+
+Fixed picking means: 
+```{r, cache= FALSE, echo=FALSE}
+cat(FIXED_PEAK_PICKING)
+```
+
+Optimized peak picking means: 
+```{r, cache= FALSE, echo=FALSE}
+cat(OPTIMIZED_PEAK_PICKING)
+```
+
+The peak picking method used was:
+```{r, cache= FALSE, echo=FALSE}
+
+if (PARAMETERS_PREPROCESSING == FIXED_PEAK_PICKING) {
+
+  cat("Fixed peak picking, therefore the fixed parameters are shown: ")
+  Parameters <- paste(name_project,'_Settings_pre-processing.txt', sep="")
+  FixedPar <- Parameters 
+  FixedPar <- file.path(path_data_out, FixedPar)
+  read.table(FixedPar, header=TRUE, sep="\t")
+  }
+
+if (PARAMETERS_PREPROCESSING == OPTIMIZED_PEAK_PICKING) {
+  cat("Optimized peak picking, therefore the optimized parameters are shown: ")
+  Parameters <- paste(name_project,'_Settings_pre-processing.txt', sep="")
+  FixedPar <- Parameters 
+  FixedPar <- file.path(path_data_out, FixedPar)
+  read.table(FixedPar, header=TRUE, sep="\t")
+}
+
+```
+
+Explaination of the used parameters: 
+
+- The value ppm is the maximal tolerated m/z deviation in consecutive scans in parts per million for the initial ROI definition.
+
+- The peakwidth is the expected approximate peak width in chromatographic space. Given as a range (min, max) in seconds.
+ 
+- The value snthresh is the signal to noise ratio cutoff.
+
+- The value noise is the minimum intensity required for centroids to be considered in the first analysis step.
+ 
+- The value mzdiff is the minimum difference in m/z dimension for peaks with overlapping retention times.
+
+- Prefilter [peaks (k), intensity (I)] are used to retain only mass traces that contain at least k peaks with intensity equal to or larger than  I.
+
+
+This automatic peak picking process uses algoritmes to identify spectral signals in two- and higher-dimensionalspectra. 
+The different metabolite peaks are identified using one or multiple detection thresholds. 
+These thresholds are applied to different parameters such as the signal-to-noise ratio, the intensity or the area of each peak from the resulting filtered spectra.
+(Alonso et al., 2015; Koradi et al., 1998)
+
+Next, spectral alignment is performed. This is one of the main processing steps in metabolomic studies involving multiple samples. 
+When analyzing multiple spectra, the position of the peaks corresponding to the same metabolic feature may be affected by non-linear shifts.
+Therefore peak alignment must be done in order to correct this undesired variability that can profoundly affect the quality of the study. 
+(Alonso et al., 2015)
+
+After peak picking and spectral alignment, the datamatrix will contain missing values in some of the samples. 
+This can be explained by the existence of badly shaped peaks or low intensity peaks that are missed in the peak picking process. 
+Gap filling algorithms search for peak structures in the RAW data and fill in the missing data. 
+(Sussulini A, 2017)
+
+\newpage
+
+**Results**
+
+The total ion count before and after alignment are presented in the next figure. 
+This shows the total amount of ions in function of the retention time.
+
+```{r out.width = "85%", fig.align="center"}
+  setwd(PATH)
+  library(EBImage)
+
+  name_plot <- paste(name_project, "_TIC_before_align.png", sep="")
+  name_plot <- file.path(path_data_out, name_plot)
+  TIC <- readImage(name_plot)
+  display(TIC)
+```
+
+```{r out.width = "85%", fig.align="center"}
+  setwd(PATH)
+  library(EBImage)
+
+  name_plot <- paste(name_project, "_TIC_RTalign.png", sep="")
+  name_plot <- file.path(path_data_out, name_plot)
+  TICalign <- readImage(name_plot)
+  display(TICalign)
+```
+
+\newpage
+
+The deviation for mass to charge (m/z) and the deviation for retention (RT) time were calculated as well. Plots from the deviation were created.
+
+```{r out.width = "80%", fig.align="center"}
+  setwd(PATH)
+  library(EBImage)
+
+  name_plot <- paste(name_project, "_plotQC1.png", sep="")
+  name_plot <- file.path(path_data_out, name_plot)
+  QC1 <- readImage(name_plot)
+  display(QC1)
+```
+
+```{r out.width = "80%", fig.align="center"}
+  setwd(PATH)
+  library(EBImage)
+
+  name_plot <- paste(name_project, "_plotQC2.png", sep="")
+  name_plot <- file.path(path_data_out, name_plot)
+  QC2 <- readImage(name_plot)
+  display(QC2)
+```
+
+At the end of the preprocessing part variable metadata was created so that statistical analysis could be performed. 
+
+```{r echo = FALSE}
+cat("\n\n")
+setwd(PATH)
+
+INPUT_AMOUNT_COMP <- paste(name_project,'_Report_CompID.txt', sep="")
+INPUT_COMP <- INPUT_AMOUNT_COMP 
+INPUT_COMP <- file.path(path_data_out, INPUT_COMP)
+readLines(INPUT_COMP)
+
+```
+
