@@ -1,0 +1,69 @@
+# Title: Software framework for the processing and statistical analysis of multivariate MS-data
+# Owner: Laboratory of Integrative Metabolomics (LIMET), Ghent university
+# Creator: Dr. Marilyn De Graeve
+# Maintainer: <limet@ugent.be>
+# Script: ErrorLog
+
+
+##########Frequently got errors##########
+#### MAIN ####
+Error in setwd(path_R_scripts) : cannot change working directory
+= forget to change path of computer, or typing error in folder "R_scripts" (eg. Rscripts)
+
+Error in setwd(path_data_in) : cannot change working directory
+= path is correct, problem: projectname wrong (eg written with space), non-existent folder to input (development after source config w wrong name)
+
+Error : cannot allocate vector of size 7.8 Mb
+or 
+killed during process 
+= not enough RAM for R pipeline to compute (probably step annotate from part pre-processing Thermo), increase RAM of Rbox if possible
+
+Not engough space
+= hard drive is full, free up space for calculating
+
+Error in file(file, ifelse(append, "a", "w")) : cannot open the connection
+= close excel, close other files opened, check path in main.r correct 
+
+Error in file(filename, "r", encoding = encoding): cannot open the connection
+Calls: source -> file
+In addition: Warning message: In file (filename, "r", encoding = encoding): cannot open file 'configuration.R': No such file or directory
+Execution halted
+= configuration.r.r extension is wrong, check configuration.r instead of twice suffix .r
+
+(process:5453): Pango-WARNING **: Invalid UTF-8 string passed to pango_layout_set_text()
+= created/exported txt can be in wrong format (incorrect UTF-8), copy/paste from txt to txt to solve.
+
+
+
+#### PART 1: pre-processing####
+Thermo:
+Error in xcmsSet(files = filenames, ppm = ppm, mzdiff = mzwid, noise = noise,  : 
+  No NetCDF/mzXML/mzData/mzML files were found.
+= zipped folder was above both bio/blank, need 2 zips for each bank/bio. of unzipped also ok, both also ok
+= or you want to run REIMS files, so selected wrong instrument 
+
+Error in eval(ei, envir) : object 'RUN_PART_MERGEVM' not found
+= na run part 1 alles gedaan, maar geen probleem. alles loopt
+
+Error in .local(object, ...) : 
+  21 of the specified 'rtrange' are completely outside of the retention time range of 'object' which is (1.06432, 839.072998046875). The first was: (849.2555, 1069.2555!
+Calls: source ... diffreport -> diffreport -> .local -> getEIC -> getEIC -> .local
+=> some samples in bio/blankfolder were run for other time (eg. spoelmethode shorter time)? remove those, so only 1 aquisition time and rt alignment possible
+
+Error in '[<- '('*tmp*', iterRow, sample, value = iterPeak) :
+  subscript of of bounds
+Calls: source ... do_groupChromPeaks_nearest -> sapply -> lapply -> FUN
+= min. 1 wrong/dissimilar blank sample (eg spoel), use only 1 blank instead or remove the wrong blank and rerun
+= OR/AND 1 corrupt file (empty spectra) still present, need to find and remove this sample from input folder
+
+Applying retention time correction to 210105_se129.mzXML
+Error in profEIC(objectn mzrange = mzrane, rtrange = rtrange, step = step) :
+  'mzrange' number 3177 (799.xxxx, 799.xxxx) is outside of mz value range of 'object'
+Calls: source ... getEIC -> .local -> getEIC -> getEIC -> .local -> profEIC
+= rm this file (in eg. above, 210105_se129.mzXML) and rerun
+
+Error in .local(object, ...) : 
+  Dimensions of profile matrices do not match !
+= occurs at retcor() step because a raw file is containing less scans (can be checked in mzXML file > scanCount), discard the previous-to-last file above this error message to solve.  
+ 
+
