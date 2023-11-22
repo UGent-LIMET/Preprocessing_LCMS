@@ -1,7 +1,7 @@
 # Title: Software framework for the processing and statistical analysis of multivariate MS-data
-# Owner: Laboratory of Chemical Analysis (LCA), Ghent university
+# Owner: Laboratory of Integrative Metabolomics (LIMET), Ghent university
 # Creator: Dr. Marilyn De Graeve
-# Running title: R pipeline
+# Maintainer: <limet@ugent.be>
 # Script: Part I: pre-processing
 
 
