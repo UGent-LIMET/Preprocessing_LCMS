@@ -25,15 +25,6 @@ get started
 
 
 ################################
-### file conversion MS Waters via Rstudio (windows, outside R pipeline)###
-# => REIMS file converter microscript in Rstudio
-# this microscript runs outside the R pipeline 
-# requirments: Windows OS and waters folder present on computer
-# to run, open in Rstudio, adjust the 'adjustments' below if needed and click "Source" to run the whole script
-# no progressbars are shown, as long as red running symbol is visible, the script is calculating
-# check file conversion succesful after finished (no symbols present)
-
-
 ### file conversion LC-MS via GUI (optimalisation)###
 # A) convert .raw files from (Q-)Exacutive into mzXML files
 #! check NO spaces in filenames!
